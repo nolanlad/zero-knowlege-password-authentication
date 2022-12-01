@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Example</title>
+    </head>
+    <body>
+        <script type = "text/javascript" src="/static/cryptotools_client.js"></script> 
+        <script type = "text/javascript" src="/static/md5.js"></script> 
+    <form id="my-form">
+    Username: <input type="text" name="username" id="123"/>
+    Username: <input type="password" name="password" />
+</form>
+<p id="demo"></p>
+<button id="myBtn">Try it</button>
+    <p id="demo"></p>
+    <p id='bigint'></p>
+
+<script>
+
+async function postData(url = '', data = {}) {
+    // Default options are marked with *
+    var js = JSON.stringify(data);
+    console.log('g');
+    console.log(js);
+    const response = await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: js // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+}
+
+function signin(uname,x,N){
+    var rs = [];
+    for(let i = 0;i<N;i++){
+        rs.push(gen_r(p));
+    }
+    var Cs = [];
+    for(let i =0;i<N;i++){
+        Cs.push(gen_C(g,p,rs[i]).toString());
+    }
+    var d = {uname:uname,C:Cs};
+    console.log(JSON.stringify(d));
+    postData('http://localhost:3030/zauth/challenges',d).then((data) => {
+        console.log(data)
+        var answers = [];
+        for(let i=0;i<data.length;i++){
+            if(data[i]==0){
+                answers.push(prove_1(g,p,rs[i],x).toString());
+            }
+            if(data[i]==1){
+                answers.push(prove_2(rs[i]).toString());
+            }
+        }
+        var data = {uname:uname,answers:answers};
+        postData('http://localhost:3030/zauth/answer',data).then((resp) => {
+            if(resp.message == 'authenticated'){
+                window.location.replace("http://localhost:3030/protected");
+            }
+        }
+
+        );
+    });
+}
+
+    function form_to_json(g){
+        f = {}; 
+        for(let i =0;i < g.length;i++){
+            f[g[i].name] = g[i].value
+        }; 
+        return f 
+    } 
+    const element = document.getElementById("myBtn");
+    element.addEventListener("click", function() {
+        // alert(0);
+    var form = document.forms['my-form'];
+    var packet = form_to_json(form);
+    var x = BigInt('0x'+md5(packet.password));
+
+    signin(packet.username,x,40);
+    });
+
+    </script>
+
+  
+
+    </body>
+</html>

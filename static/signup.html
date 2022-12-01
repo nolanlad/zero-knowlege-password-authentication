@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Example</title>
+    </head>
+    <body>
+        <script type = "text/javascript" src="/static/cryptotools_client.js"></script> 
+        <script type = "text/javascript" src="/static/md5.js"></script> 
+    <form id="my-form">
+    Username: <input type="text" name="username" id="123"/>
+    Username: <input type="password" name="password" />
+</form>
+<p id="demo"></p>
+<button id="myBtn">Try it</button>
+    <p id="demo"></p>
+    <p id='bigint'></p>
+
+<script>
+
+    async function postData(url = '', data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+
+
+    function form_to_json(g){
+        f = {}; for(let i =0;i < g.length;i++){f[g[i].name] = g[i].value}; return f 
+    } 
+    
+    const element = document.getElementById("myBtn");
+    element.addEventListener("click", function() {
+    var form = document.forms['my-form'];
+    var packet = form_to_json(form);
+    var x = BigInt('0x'+md5(packet['password']));
+    var y = gen_y(g,p,x);
+    var user_data = {uname:packet['username'],y:y.toString()}
+    postData('http://localhost:3030/zauth/signup', user_data)
+    .then((data) => {
+        document.getElementById("demo").innerHTML = JSON.stringify(data); // JSON data parsed by `data.json()` call
+    });
+    
+
+    });
+    </script>
+
+  
+
+    </body>
+</html>
